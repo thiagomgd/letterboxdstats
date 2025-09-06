@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import type { ParsedLetterboxdDiaryEntry } from "./types";
 
 type MoviesSummaryProps = {
@@ -97,21 +97,88 @@ function buildMoviesByTag(
   return groupedMovies;
 }
 
-function renderMoviesByTag(moviesByTag: GroupedMovies, level: number = 0) {
-  if (!moviesByTag || typeof moviesByTag !== "object") return null;
+interface ExpandableSectionProps {
+  title: string;
+  children: React.ReactNode;
+  level: number;
+  isExpanded: boolean;
+  onToggle: () => void;
+}
+
+const ExpandableSection: React.FC<ExpandableSectionProps> = ({
+  title,
+  children,
+  level,
+  isExpanded,
+  onToggle,
+}) => {
   return (
-    <ul style={{ marginLeft: level * 20 }}>
-      {Object.entries(moviesByTag).map(([tag, value]) => (
-        <li key={tag}>
-          <strong>{tag}</strong>
-          {Array.isArray(value) ? (
-            <>: {value.join(", ")}</>
-          ) : (
-            renderMoviesByTag(value as GroupedMovies, level + 1)
-          )}
-        </li>
-      ))}
-    </ul>
+    <div style={{ marginLeft: level * 20, marginBottom: 8 }}>
+      <button
+        onClick={onToggle}
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          padding: 4,
+          fontSize: "inherit",
+          fontWeight: "bold",
+        }}
+      >
+        <span style={{ marginRight: 8, fontSize: "1.2em" }}>
+          {isExpanded ? "▼" : "▶"}
+        </span>
+        {title}
+      </button>
+      {isExpanded && (
+        <div style={{ marginLeft: 20, marginTop: 4 }}>{children}</div>
+      )}
+    </div>
+  );
+};
+
+function renderMoviesByTag(
+  moviesByTag: GroupedMovies,
+  level: number = 0,
+  expandedSections: Set<string>,
+  toggleSection: (key: string) => void,
+) {
+  if (!moviesByTag || typeof moviesByTag !== "object") return null;
+
+  return (
+    <div>
+      {Object.entries(moviesByTag).map(([tag, value]) => {
+        const sectionKey = `${level}-${tag}`;
+        const isExpanded = expandedSections.has(sectionKey);
+
+        if (Array.isArray(value)) {
+          return (
+            <div key={tag} style={{ marginLeft: level * 20, marginBottom: 8 }}>
+              <strong>{tag}</strong>: {value.join(", ")}
+            </div>
+          );
+        }
+
+        return (
+          <ExpandableSection
+            key={tag}
+            title={tag}
+            level={level}
+            isExpanded={isExpanded}
+            onToggle={() => toggleSection(sectionKey)}
+          >
+            {renderMoviesByTag(
+              value as GroupedMovies,
+              level + 1,
+              expandedSections,
+              toggleSection,
+            )}
+          </ExpandableSection>
+        );
+      })}
+    </div>
   );
 }
 
@@ -125,10 +192,27 @@ const MoviesSummary: React.FC<MoviesSummaryProps> = ({
   const [moviesByTag, setMoviesByTag] = React.useState<GroupedMovies | null>(
     null,
   );
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(),
+  );
 
   useEffect(() => {
     setMoviesByTag(buildMoviesByTag(diaryData, prefixSeparator, groupBy));
+    // Reset expanded sections when data changes
+    setExpandedSections(new Set());
   }, [diaryData, prefixSeparator, groupBy]);
+
+  const toggleSection = (key: string) => {
+    setExpandedSections((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
+  };
 
   return (
     <div>
@@ -147,7 +231,8 @@ const MoviesSummary: React.FC<MoviesSummaryProps> = ({
           </select>
         </label>
         <h2>Movies by {groupBy}</h2>
-        {moviesByTag && renderMoviesByTag(moviesByTag)}
+        {moviesByTag &&
+          renderMoviesByTag(moviesByTag, 0, expandedSections, toggleSection)}
       </div>
     </div>
   );
