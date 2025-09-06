@@ -6,16 +6,16 @@ type MoviesSummaryProps = {
   prefixSeparator?: string;
 };
 
-type GroupedMovies = Record<
-  string,
-  string[] | Record<string, string[] | Record<string, string[]>>
->;
+interface GroupedMovies {
+  [key: string | number]: string[] | GroupedMovies;
+}
 
 function buildMoviesByTag(
   diaryData: ParsedLetterboxdDiaryEntry[],
   prefixSeparator: string,
   groupBy: "year" | "month" | "week",
 ) {
+  console.log(diaryData);
   const groupedMovies: GroupedMovies = {};
 
   diaryData.forEach((entry) => {
@@ -25,41 +25,38 @@ function buildMoviesByTag(
     const watchedDate = new Date(entry.watchedDate);
     const year = watchedDate.getFullYear();
     const month = watchedDate.getMonth() + 1; // getMonth() returns 0-11
-    const week = Math.ceil(watchedDate.getDate() / 7);
+    const week = `Week ${Math.ceil(watchedDate.getDate() / 7)}`;
 
-    // Determine the grouping structure based on groupBy
-    let dateKey: string;
+    // console.log({ watched: entry.watchedDate, year, month, week });
     let parentGroup: GroupedMovies;
 
-    switch (groupBy) {
-      case "year":
-        dateKey = year.toString();
-        parentGroup = groupedMovies;
-        break;
-      case "month":
-        dateKey = `${year}-${month.toString().padStart(2, "0")}`;
-        if (!groupedMovies[year]) {
-          groupedMovies[year] = {};
-        }
-        parentGroup = groupedMovies[year] as GroupedMovies;
-        break;
-      case "week":
-        dateKey = `Week ${week}`;
-        if (!groupedMovies[year]) {
-          groupedMovies[year] = {};
-        }
-        if (!(groupedMovies[year] as GroupedMovies)[month]) {
-          (groupedMovies[year] as GroupedMovies)[month] = {};
-        }
-        parentGroup = (groupedMovies[year] as GroupedMovies)[
-          month
-        ] as GroupedMovies;
-        break;
-    }
+    if (groupBy === "year") {
+      if (!groupedMovies[year]) {
+        groupedMovies[year] = {};
+      }
 
-    // Initialize the date group if it doesn't exist
-    if (!parentGroup[dateKey]) {
-      parentGroup[dateKey] = {};
+      parentGroup = groupedMovies;
+    } else if (groupBy === "month") {
+      if (!groupedMovies[year]) {
+        groupedMovies[year] = {};
+      }
+      if (!groupedMovies[year][month]) {
+        groupedMovies[year][month] = {};
+      }
+      parentGroup = groupedMovies[year][month] as GroupedMovies;
+    } else {
+      if (!groupedMovies[year]) {
+        groupedMovies[year] = {};
+      }
+      if (!groupedMovies[year][month]) {
+        groupedMovies[year][month] = {};
+      }
+      if (!(groupedMovies[year][month] as GroupedMovies)[week]) {
+        (groupedMovies[year][month] as GroupedMovies)[week] = {};
+      }
+      parentGroup = (groupedMovies[year][month] as GroupedMovies)[
+        week
+      ] as GroupedMovies;
     }
 
     // Add movies by tags under the date group
@@ -71,19 +68,18 @@ function buildMoviesByTag(
           .filter(Boolean);
         if (parts.length === 0) return;
 
-        let current = parentGroup[dateKey] as GroupedMovies;
         for (let i = 0; i < parts.length - 1; i++) {
           const part = parts[i];
-          if (!current[part]) {
-            current[part] = {};
+          if (!parentGroup[part]) {
+            parentGroup[part] = {};
           }
-          current = current[part] as GroupedMovies;
+          parentGroup = parentGroup[part] as GroupedMovies;
         }
         const lastPart = parts[parts.length - 1];
-        if (!current[lastPart]) {
-          current[lastPart] = [];
+        if (!parentGroup[lastPart]) {
+          parentGroup[lastPart] = [];
         }
-        (current[lastPart] as string[]).push(entry.name);
+        (parentGroup[lastPart] as string[]).push(entry.name);
       });
     }
 
@@ -91,15 +87,14 @@ function buildMoviesByTag(
     if (entry.year && !isNaN(entry.year)) {
       const decade = Math.floor(entry.year / 10) * 10;
       const decadeKey = `${decade}s`;
-      if (!(parentGroup[dateKey] as GroupedMovies)[decadeKey]) {
-        (parentGroup[dateKey] as GroupedMovies)[decadeKey] = [];
+      if (!parentGroup[decadeKey]) {
+        parentGroup[decadeKey] = [];
       }
-      ((parentGroup[dateKey] as GroupedMovies)[decadeKey] as string[]).push(
-        entry.name,
-      );
+      (parentGroup[decadeKey] as string[]).push(entry.name);
     }
   });
 
+  console.log(groupedMovies);
   return groupedMovies;
 }
 

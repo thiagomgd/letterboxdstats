@@ -1,6 +1,4 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
 import type { ParsedLetterboxdDiaryEntry } from "./types";
 import MoviesSummary from "./MoviesSumary";
@@ -11,14 +9,6 @@ function App() {
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
       <h1>Letterboxd Diary Stats</h1>
       <p>
         This is a tool to create weekly and monthly stats for your Letterboxd
@@ -51,7 +41,7 @@ function App() {
               reader.onload = (event) => {
                 // You can handle the CSV content here
                 // For now, just log it to the console
-                console.log(event.target?.result);
+
                 if (event.target?.result) {
                   const csv = event.target.result as string;
                   const lines = csv
