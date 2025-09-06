@@ -132,8 +132,6 @@ const MoviesSummary: React.FC<MoviesSummaryProps> = ({
 
   return (
     <div>
-      <h2>Movies by Tag</h2>
-
       <div>
         <label>
           Group by:{" "}
@@ -148,7 +146,7 @@ const MoviesSummary: React.FC<MoviesSummaryProps> = ({
             <option value="week">Week</option>
           </select>
         </label>
-        <h2>Movies by Tag</h2>
+        <h2>Movies by {groupBy}</h2>
         {moviesByTag && renderMoviesByTag(moviesByTag)}
       </div>
     </div>

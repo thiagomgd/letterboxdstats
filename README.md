@@ -1,3 +1,9 @@
+# Letterboxd Visualization
+
+This is a personal project to visualize yearly/monthly/weekly Letterboxd data grouped by tags.
+
+Work in progress and instructions to come.
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
