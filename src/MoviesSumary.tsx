@@ -62,24 +62,23 @@ function buildMoviesByTag(
     // Add movies by tags under the date group
     if (entry.parsedTags) {
       entry.parsedTags.forEach((tag) => {
-        const parts = tag
-          .split(prefixSeparator)
-          .map((part) => part.trim())
-          .filter(Boolean);
-        if (parts.length === 0) return;
+        let tagParent = parentGroup;
+        const parts = tag.split(prefixSeparator).map((part) => part.trim());
+        //   .filter(Boolean);
+        // if (parts.length === 0) return;
 
         for (let i = 0; i < parts.length - 1; i++) {
           const part = parts[i];
-          if (!parentGroup[part]) {
-            parentGroup[part] = {};
+          if (!tagParent[part]) {
+            tagParent[part] = {};
           }
-          parentGroup = parentGroup[part] as GroupedMovies;
+          tagParent = tagParent[part] as GroupedMovies;
         }
         const lastPart = parts[parts.length - 1];
-        if (!parentGroup[lastPart]) {
-          parentGroup[lastPart] = [];
+        if (!tagParent[lastPart]) {
+          tagParent[lastPart] = [];
         }
-        (parentGroup[lastPart] as string[]).push(entry.name);
+        (tagParent[lastPart] as string[]).push(entry.name);
       });
     }
 
