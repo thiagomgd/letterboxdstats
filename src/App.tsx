@@ -52,7 +52,7 @@ function App() {
                   const entries: ParsedLetterboxdDiaryEntry[] = lines
                     .slice(1)
                     .map((line) => {
-                      const cols = line.split(",");
+                      const cols = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
                       // Map columns by header
                       const get = (header: string) => {
                         const idx = headers.indexOf(header);
@@ -69,6 +69,7 @@ function App() {
                       const tagsStr = get("Tags");
                       const parsedTags = tagsStr
                         ? tagsStr
+                            .replace(/^"|"$/g, "")
                             .split(",")
                             .map((t) => t.trim())
                             .filter(Boolean)
