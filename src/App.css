@@ -40,3 +40,9 @@
 .read-the-docs {
   color: #888;
 }
+
+/* END OF DEFAULT VITE CSS */
+
+li {
+  text-align: left;
+}

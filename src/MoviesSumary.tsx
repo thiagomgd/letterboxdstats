@@ -155,9 +155,28 @@ function renderMoviesByTag(
 
         if (Array.isArray(value)) {
           return (
-            <div key={tag} style={{ marginLeft: level * 20, marginBottom: 8 }}>
-              <strong>{tag}</strong>: {value.join(", ")}
-            </div>
+            <ExpandableSection
+              key={tag}
+              title={`${tag}: ${value.length}`}
+              level={level}
+              isExpanded={isExpanded}
+              onToggle={() => toggleSection(sectionKey)}
+            >
+              <ul
+                key={tag}
+                style={{
+                  marginLeft: level * 20,
+                  marginBottom: 8,
+                  paddingLeft: 20,
+                }}
+              >
+                {value.map((movie, index) => (
+                  <li key={index} style={{ marginBottom: 4 }}>
+                    {movie}
+                  </li>
+                ))}
+              </ul>
+            </ExpandableSection>
           );
         }
 
