@@ -2,7 +2,9 @@
 
 This is a personal project to visualize yearly/monthly/weekly Letterboxd data grouped by tags.
 
-Work in progress and instructions to come.
+Work in progress and instructions and examples to come. 
+
+https://thiagomgd.github.io/letterboxdstats/
 
 # React + TypeScript + Vite
 

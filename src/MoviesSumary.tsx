@@ -15,7 +15,6 @@ function buildMoviesByTag(
   prefixSeparator: string,
   groupBy: "year" | "month" | "week",
 ) {
-  console.log(diaryData);
   const groupedMovies: GroupedMovies = {};
 
   diaryData.forEach((entry) => {
@@ -27,7 +26,6 @@ function buildMoviesByTag(
     const month = watchedDate.getMonth() + 1; // getMonth() returns 0-11
     const week = `Week ${Math.ceil(watchedDate.getDate() / 7)}`;
 
-    // console.log({ watched: entry.watchedDate, year, month, week });
     let parentGroup: GroupedMovies;
 
     if (groupBy === "year") {
@@ -93,7 +91,6 @@ function buildMoviesByTag(
     }
   });
 
-  console.log(groupedMovies);
   return groupedMovies;
 }
 
